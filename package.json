@@ -1,0 +1,29 @@
+{
+  "type": "module",
+  "imports": {
+    "#common": "./common/index.js",
+    "#common/*": "./common/*",
+    "#lib/*": "./lib/*"
+  },
+  "scripts": {
+    "lint": "eslint . --ext js,mjs",
+    "prettier": "prettier --write ."
+  },
+  "dependencies": {
+    "blake2": "^4.1.1",
+    "debug": "^4.3.4",
+    "ip6addr": "^0.2.5",
+    "yargs": "^17.4.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.17.9",
+    "@babel/eslint-parser": "^7.17.0",
+    "eslint": "^8.12.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "prettier": "^2.6.2"
+  },
+  "packageManager": "yarn@3.2.0"
+}
