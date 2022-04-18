@@ -11,7 +11,7 @@ export function encodeMessage({
   message,
   messageType,
   extensions,
-  network = constants.NETWORK.BETA
+  network = constants.NETWORK.BETA.ID
 }) {
   const messageLength = message.length
   const packet = Buffer.alloc(8 + messageLength)
@@ -76,13 +76,13 @@ export function decodeNodeHandshake({ packet, extensions }) {
   let response
   let extraPtr = 0
   if (hasQuery) {
-    query = packet.subarray(0, 32);
-    extraPtr = 32;
+    query = packet.subarray(0, 32)
+    extraPtr = 32
   }
   if (hasResponse) {
-    const responseX = packet.subarray(extraPtr, 96 + extraPtr);
-    const account = responseX.subarray(0, 32);
-    const signature = responseX.subarray(32, 96;
+    const responseX = packet.subarray(extraPtr, 96 + extraPtr)
+    const account = responseX.subarray(0, 32)
+    const signature = responseX.subarray(32, 96)
     response = {
       account,
       signature
