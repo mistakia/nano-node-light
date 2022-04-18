@@ -1,5 +1,7 @@
 export const MAGIC_NUMBER = 'R'.charCodeAt(0)
 
+export const SELF_ADDRESS = Buffer.alloc(16, 0)
+
 export const MESSAGE_TYPE = {
   INVALID: 0x00,
   NAT: 0x01,
