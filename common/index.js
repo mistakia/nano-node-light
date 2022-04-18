@@ -84,24 +84,20 @@ export function encodeIPv6(raw) {
 }
 
 export function decodeNodeHandshake({ packet, extensions }) {
-  const hasQuery = !!(extensions & 0x0001)
-  const hasResponse = !!(extensions & 0x0002)
-  const correctLength = (hasQuery && 32) + (hasResponse && 96)
-  if (packet.length !== correctLength) {
-    return {}
-  }
+  const hasQuery = !!(extensions & 1)
+  const hasResponse = !!(extensions & 2)
 
   let query
   let response
   let extraPtr = 0
   if (hasQuery) {
-    query = packet.subarray(0, 32)
-    extraPtr = 32
+    query = packet.subarray(0, 32);
+    extraPtr = 32;
   }
   if (hasResponse) {
-    const responseX = packet.subarray(extraPtr, 96 + extraPtr)
-    const account = responseX.subarray(0, 32)
-    const signature = responseX.subarray(32, 96)
+    const responseX = packet.subarray(extraPtr, 96 + extraPtr);
+    const account = responseX.subarray(0, 32);
+    const signature = responseX.subarray(32, 96;
     response = {
       account,
       signature
