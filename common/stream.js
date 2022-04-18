@@ -65,7 +65,7 @@ function getSize(header) {
   }
 }
 
-function streamPacketBody(packet, network = constants.NETWORK.BETA.ID) {
+function streamPacketBody(packet) {
   const state = this.state
 
   const bodyPtr = state.expectedBodySize - state.bodySize
@@ -83,16 +83,16 @@ function streamPacketBody(packet, network = constants.NETWORK.BETA.ID) {
 
     const leftover = packet.subarray(bodyPtr)
     if (leftover.length > 0) {
-      this.streamPacket(leftover, (network = constants.NETWORK.BETA.ID))
+      this.streamPacket(leftover)
     }
   }
 }
 
-function streamPacket(packet, network = constants.NETWORK.BETA.ID) {
+function streamPacket(packet) {
   const state = this.state
 
   if (state.headerLength == 8) {
-    streamPacketBody(packet, network)
+    streamPacketBody(packet)
   } else {
     const headerPtr = 8 - state.headerLength
     const header = packet.subarray(0, headerPtr)
@@ -101,7 +101,7 @@ function streamPacket(packet, network = constants.NETWORK.BETA.ID) {
 
     if (state.headerLength >= 8) {
       if (state.header[0] !== constants.MAGIC_NUMBER) return true
-      if (state.header[1] !== network) return true
+      if (state.header[1] !== this.network) return true
       if (state.header[2] < 0x12) return true
       if (state.header[3] !== 0x12) return true
       if (state.header[4] > 0x12) return true
@@ -119,13 +119,13 @@ function streamPacket(packet, network = constants.NETWORK.BETA.ID) {
 
     const leftover = packet.subarray(headerPtr)
     if (leftover.length > 0 || state.expectedBodySize == 0) {
-      this.streamPacketBody(leftover, network)
+      this.streamPacketBody(leftover)
     }
   }
 }
 
 class NanoStream {
-  constructor(network) {
+  constructor(network = constants.NETWORK.BETA.ID) {
     this._ev = {
       message: [],
       error: []
@@ -138,7 +138,7 @@ class NanoStream {
   }
 
   process(packet) {
-    const result = this.streamPacket(packet, this.network)
+    const result = this.streamPacket(packet)
 
     if (result) {
       this.emit('error')
