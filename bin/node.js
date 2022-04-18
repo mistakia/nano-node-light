@@ -49,6 +49,6 @@ node.on('error', (error) => {
 })
 
 node.connect({
-  address: 'peering-beta.nano.org',
-  port: 54000
+  address: network.ADDRESS,
+  port: network.PORT
 })
