@@ -26,21 +26,6 @@ export function encodeMessage({
   return packet
 }
 
-export function decodeMessage({ packet, network = constants.NETWORK.BETA }) {
-  if (packet[0] !== constants.MAGIC_NUMBER) return null
-  if (packet[1] !== network) return null
-  if (packet[3] !== 0x12) return null
-  // if (packet.length < 9) return null;
-  const messageType = packet[5]
-  const extensions = packet.readUInt16LE(6)
-  const data = packet.slice(8)
-  return {
-    messageType,
-    extensions,
-    data
-  }
-}
-
 export function decodeConnectionInfo(raw) {
   const address = encodeIPv6(raw.subarray(0, 16))
   const port = raw.readUInt16LE(16)
