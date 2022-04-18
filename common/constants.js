@@ -32,7 +32,19 @@ export const MESSAGE_TYPE_NAME = {
 }
 
 export const NETWORK = {
-  LIVE: 'C'.charCodeAt(0),
-  BETA: 'B'.charCodeAt(0),
-  TEST: 'X'.charCodeAt(0)
+  LIVE: {
+    ID: 'C'.charCodeAt(0),
+    ADDRESS: 'peering.nano.org',
+    PORT: 7075
+  },
+  BETA: {
+    ID: 'B'.charCodeAt(0),
+    ADDRESS: 'peering-beta.nano.org',
+    PORT: 54000
+  },
+  TEST: {
+    ID: 'X'.charCodeAt(0),
+    ADDRESS: 'peering-test.nano.org',
+    PORT: 17075
+  }
 }

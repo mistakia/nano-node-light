@@ -1,7 +1,10 @@
-import NanoNode from '#lib/nano-node.js'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+
+import NanoNode from '#lib/nano-node.js'
+import { constants } from '#common'
+
 const argv = yargs(hideBin(process.argv)).argv
 
 const log = debug('bin')
@@ -17,9 +20,24 @@ if (!argv.port) {
   process.exit()
 }
 
+const getNetwork = (network = 'beta') => {
+  switch (network) {
+    case 'live':
+      return constants.NETWORK.LIVE
+    case 'beta':
+      return constants.NETWORK.BETA
+    case 'test':
+      return constants.NETWORK.TEST
+    default:
+      return constants.NETWORK.BETA
+  }
+}
+
+const network = getNetwork(argv.network)
 const node = new NanoNode({
   address: argv.address,
-  port: argv.port
+  port: argv.port,
+  network
 })
 
 node.on('message', (message) => {
@@ -31,6 +49,6 @@ node.on('error', (error) => {
 })
 
 node.connect({
-  address: '::ffff:194.146.12.171',
+  address: 'peering-beta.nano.org',
   port: 54000
 })
