@@ -161,10 +161,7 @@ class NanoStream {
     }
   }
   emit(evName, ...args) {
-
-    if (this._ev[evName] == undefined) {
-      console.log("Emit",evName)
-    }
+    if (this._ev[evName] == undefined) return;
     this._ev[evName].forEach(async(cb) => {
       cb(...args);
     })
@@ -178,4 +175,4 @@ class NanoStream {
 NanoStream.prototype.streamPacket = streamPacket;
 NanoStream.prototype.streamPacketBody = streamPacketBody;
 
-module.exports = NanoStream;
+export default NanoStream;
