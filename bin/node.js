@@ -40,10 +40,6 @@ const node = new NanoNode({
   network
 })
 
-node.on('message', (message) => {
-  console.log(message)
-})
-
 node.on('error', (error) => {
   console.log(error)
 })
