@@ -7,6 +7,16 @@ import * as ed25519 from './ed25519.js'
 
 export { constants, ed25519, encodeNanoBase32, decodeNanoBase32 }
 
+export function hash32(input) {
+  const hash = blake2
+    .createHash('blake2b', {
+      digestLength: 32
+    })
+    .update(input)
+    .digest()
+  return hash
+}
+
 export function encodeMessage({
   message,
   messageType,
@@ -91,5 +101,37 @@ export function decodeNodeHandshake({ packet, extensions }) {
   return {
     query,
     response
+  }
+}
+
+const votePrefix = Buffer.from('vote ')
+
+export function decodeVote({ body, extensions }) {
+  const voteCount = (extensions & 0xf000) >> 12
+
+  const account = body.subarray(0, 32)
+  const signature = body.subarray(32, 96)
+  const timestamp = body.subarray(96, 104)
+
+  const hashItemPtr = 104 + 32 * voteCount
+  if (body.length < hashItemPtr) return null
+
+  const hashItems = body.subarray(104, hashItemPtr)
+  const hashList = []
+
+  for (let i = 0; i < voteCount; i++) {
+    const hashPtr = 32 * i
+    hashList.push(hashItems.subarray(hashPtr, hashPtr + 32))
+  }
+
+  const voteHash = hash32(Buffer.concat([votePrefix, hashItems, timestamp]))
+  const isValid = ed25519.verify(signature, voteHash, account)
+
+  return {
+    account,
+    signature,
+    timestamp,
+    hashList,
+    isValid
   }
 }
