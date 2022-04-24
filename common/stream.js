@@ -79,6 +79,7 @@ function streamPacketBody(packet) {
     const msgInfo = Object.assign({}, state)
     delete msgInfo.bodySize
     delete msgInfo.expectedBodySize
+    delete msgInfo.headerLength
     this.emit('message', msgInfo)
 
     this.state = getDefault()
@@ -115,7 +116,6 @@ function streamPacket(packet) {
       state.body = Buffer.alloc(bodySize)
       state.expectedBodySize = bodySize
 
-      delete state.headerLength
       delete state.header
     }
 
