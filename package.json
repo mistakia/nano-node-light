@@ -1,4 +1,6 @@
 {
+  "name": "nano-node-light",
+  "version": "0.0.1",
   "type": "module",
   "imports": {
     "#common": "./common/index.js",
