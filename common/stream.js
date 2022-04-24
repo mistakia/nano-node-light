@@ -5,15 +5,17 @@
 
 import * as constants from './constants.js'
 
-const defaultStreamState = {
-  header: Buffer.alloc(8),
-  headerLength: 0,
-  message_type: null,
-  version: null,
-  extensions: null,
-  bodySize: 0,
-  expectedBodySize: null,
-  body: null
+function getDefault() {
+  return {
+    header: Buffer.alloc(8),
+    headerLength: 0,
+    message_type: null,
+    version: null,
+    extensions: null,
+    bodySize: 0,
+    expectedBodySize: null,
+    body: null
+  }
 }
 
 const blockSizes = {
@@ -79,7 +81,7 @@ function streamPacketBody(packet) {
     delete msgInfo.expectedBodySize
     this.emit('message', msgInfo)
 
-    this.state = Object.assign({}, defaultStreamState)
+    this.state = getDefault()
 
     const leftover = packet.subarray(bodyPtr)
     if (leftover.length > 0) {
@@ -132,7 +134,7 @@ class NanoStream {
     }
 
     this.network = network
-    this.state = Object.assign({}, defaultStreamState)
+    this.state = getDefault()
     this.isBusy = false
     this.queue = []
   }
