@@ -95,7 +95,7 @@ function streamPacket(packet) {
   const state = this.state
 
   if (state.headerLength == 8) {
-    streamPacketBody(packet)
+    this.streamPacketBody(packet)
   } else {
     const headerPtr = 8 - state.headerLength
     const header = packet.subarray(0, headerPtr)
