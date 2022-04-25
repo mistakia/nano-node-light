@@ -72,7 +72,8 @@ function streamPacketBody(packet) {
 
   const bodyPtr = state.expectedBodySize - state.bodySize
   const body = packet.subarray(0, bodyPtr)
-  body.copy(state.body, 0, state.bodySize, state.expectedBodySize)
+  // add segment to end of current state body buffer
+  state.body.set(body, state.bodySize)
   state.bodySize += body.length
 
   if (state.bodySize == state.expectedBodySize) {
@@ -99,7 +100,7 @@ function streamPacket(packet) {
   } else {
     const headerPtr = 8 - state.headerLength
     const header = packet.subarray(0, headerPtr)
-    header.copy(state.header, 0, state.headerLength, 8)
+    state.header.set(header, state.headerLength)
     state.headerLength += header.length
 
     if (state.headerLength >= 8) {
