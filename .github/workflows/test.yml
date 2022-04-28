@@ -1,0 +1,29 @@
+name: Test
+
+on: push
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v1
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.15.0
+
+      - name: yarn install
+        run: |
+          yarn install
+
+      - name: yarn test
+        run: |
+          yarn lint
+          yarn test

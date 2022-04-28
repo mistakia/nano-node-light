@@ -89,7 +89,7 @@ function getSize_Origin(header) {
       return 0
     }
   }
-  
+
   return null
 }
 
@@ -98,7 +98,7 @@ function getSize_Light(header) {
 }
 
 function getSize(header, mode) {
-  if (mode == 1) {
+  if (mode === 1) {
     return getSize_Light(header)
   } else {
     return getSize_Origin(header)
@@ -113,7 +113,7 @@ function streamPacketBody(packet) {
   state.body.set(body, state.bodySize)
   state.bodySize += body.length
 
-  if (state.bodySize == state.expectedBodySize) {
+  if (state.bodySize === state.expectedBodySize) {
     const msgInfo = Object.assign({}, state)
     delete msgInfo.bodySize
     delete msgInfo.expectedBodySize
@@ -130,11 +130,11 @@ function streamPacketBody(packet) {
 }
 
 function streamPacket(packet) {
-  if (!this.active) return;
-  
+  if (!this.active) return
+
   const state = this.state
 
-  if (state.headerLength == 8) {
+  if (state.headerLength === 8) {
     this.streamPacketBody(packet)
   } else {
     const headerPtr = 8 - state.headerLength
@@ -142,7 +142,7 @@ function streamPacket(packet) {
     state.header.set(header, state.headerLength)
     state.headerLength += header.length
 
-    if (state.headerLength == 8) {
+    if (state.headerLength === 8) {
       if (state.header[0] !== constants.MAGIC_NUMBER) return true
       if (state.header[1] !== this.network) return true
       if (state.header[2] < 0x12) return true
@@ -152,8 +152,8 @@ function streamPacket(packet) {
       state.message_type = state.header[5]
       state.extensions = (state.header[7] << 8) + state.header[6]
       const bodySize = getSize(state, this.streamMode)
-      
-      if (bodySize == null) return true;
+
+      if (bodySize == null) return true
       state.body = Buffer.alloc(bodySize)
       state.expectedBodySize = bodySize
 
@@ -174,10 +174,10 @@ class NanoStream {
     this.state = getDefault()
     this.isBusy = false
     this.queue = []
-    
-    this.streamMode = 0;
-    
-    this.active = true;
+
+    this.streamMode = 0
+
+    this.active = true
   }
 
   process(packet) {
@@ -195,14 +195,14 @@ class NanoStream {
       }
     }
   }
-  
+
   destroy() {
-    this.active = false;
-    this.queue = [];
-    this.isBusy = true;
-    delete this.state;
+    this.active = false
+    this.queue = []
+    this.isBusy = true
+    delete this.state
   }
-  
+
   push(packet) {
     if (this.isBusy) {
       this.queue.push(packet)
@@ -213,9 +213,9 @@ class NanoStream {
   }
 
   emit(evName, ...args) {
-    if (this._ev[evName] == undefined) return
-    this._ev[evName].forEach(async (cb) => {
-      cb(...args)
+    if (typeof this._ev[evName] === 'undefined') return
+    this._ev[evName].forEach(async function (listener) {
+      listener(...args)
     })
   }
 

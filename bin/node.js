@@ -25,8 +25,6 @@ const getNetwork = (network = 'beta') => {
 
 const network = getNetwork(argv.network)
 const config = {
-  address: argv.address,
-  port: argv.port,
   network,
   requestTelemetry: argv.telemetry
 }
@@ -40,6 +38,7 @@ node.on('telemetry', (telemetry) => {
   log(telemetry)
 })
 
+// connect to network bootstrap peers
 node.connect({
   address: network.ADDRESS,
   port: network.PORT
