@@ -1,6 +1,6 @@
 # About
 
-#### This is a Light Nano Node implementation made for Wallets, Exchanges and other services. This Node has been built to be compatbile with the official reference implementation of Nano.
+#### This is a Light Nano Node implementation made for Wallets, Exchanges and other services. This Node has been built to be compatible with the official reference implementation of Nano.
 
 # Donations
 
