@@ -7,7 +7,3 @@
 #### Nano / XNO: nano_33tmu196ih9q8bgz5mpyk8xaohydk4bahi96dgyx1b7fmzh3oopny9pr1uwm
 
 #### Banano / BAN: ban_33tmu196ih9q8bgz5mpyk8xaohydk4bahi96dgyx1b7fmzh3oopny9pr1uwm
-
-
-# Approved by Linus Torvals
-# Approved by Colin LeMahieu
