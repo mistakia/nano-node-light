@@ -138,6 +138,7 @@ function streamPacketBody(packet) {
     delete msgInfo.bodySize
     delete msgInfo.expectedBodySize
     delete msgInfo.headerLength
+    delete msgInfo.header
     this.emit('message', msgInfo)
 
     setDefaultState(this.state)
