@@ -6,7 +6,8 @@
   "imports": {
     "#common": "./common/index.js",
     "#common/*": "./common/*",
-    "#lib/*": "./lib/*"
+    "#lib/*": "./lib/*",
+    "#test/*": "./test/*"
   },
   "scripts": {
     "lint": "eslint . --ext js,mjs",
