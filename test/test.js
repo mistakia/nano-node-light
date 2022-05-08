@@ -41,7 +41,7 @@ describe('Nano Node', function () {
 
     // connect to node_a
     const { address, port } = node_a.server.address()
-    node_b.connect({ address, port })
+    node_b.connectAddress({ address, port })
 
     await waitForHandshake()
   })
