@@ -17,6 +17,6 @@ export const createClientNode = (serverNode) => {
   const node = new NanoNode()
   // connect to server
   const { address, port } = serverNode.server.address()
-  node.connect({ address, port })
+  node.connectAddress({ address, port })
   return node
 }
