@@ -39,7 +39,7 @@ node.on('telemetry', (telemetry) => {
 })
 
 // connect to network bootstrap peers
-node.connect({
+node.connectDomain({
   address: network.ADDRESS,
   port: network.PORT
 })
