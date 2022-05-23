@@ -10,6 +10,11 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('bootstrap')
 debug.enable('*')
 
+if (!argv.account) {
+  log('missing --account')
+  process.exit()
+}
+
 const getNetwork = (network = 'live') => {
   switch (network) {
     case 'live':
@@ -25,7 +30,7 @@ const getNetwork = (network = 'live') => {
 
 const network = getNetwork(argv.network)
 const client = new BulkPull({
-  host: argv.host,
+  host: argv.host || network.ADDRESS,
   port: argv.post || network.PORT,
   network
 })
@@ -52,9 +57,5 @@ client.on('end', () => {
   log('end')
 })
 
-const account = Buffer.from(
-  argv.account ||
-    'AADF2D5E7BE0692D52952466216B3BB4CCCC3A2CAD63E126F34A52A22717269C',
-  'hex'
-)
+const account = Buffer.from(argv.account, 'hex')
 client.request({ start: account, count: argv.count })
