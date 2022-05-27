@@ -70,20 +70,38 @@ function getSize_Origin(header) {
     }
     case constants.MESSAGE_TYPE.CONFIRM_REQ: {
       const blockType = (header.extensions & 0x0f00) >> 8
-      const blockCount = (header.extensions & 0xf000) >> 12
+      const is_v2 = (header.extensions & 0x01) !== 0
+      let block_count
+
+      if (is_v2) {
+        const left = (header.extensions & 0xf000) >> 12
+        const right = (header.extensions & 0x00f0) >> 4
+        block_count = (left << 4) | right
+      } else {
+        block_count = (header.extensions & 0xf000) >> 12
+      }
 
       if (blockType !== 0 && blockType !== 1) {
         const blockSize = blockSizes[blockType]
         if (blockSize) return blockSize
       } else if (blockType === 1) {
-        return blockCount * 64
+        return block_count * 64
       }
 
       return 0
     }
     case constants.MESSAGE_TYPE.CONFIRM_ACK: {
       const blockType = (header.extensions & 0x0f00) >> 8
-      const blockCount = (header.extensions & 0xf000) >> 12
+      const is_v2 = (header.extensions & 0x01) !== 0
+      let block_count
+
+      if (is_v2) {
+        const left = (header.extensions & 0xf000) >> 12
+        const right = (header.extensions & 0x00f0) >> 4
+        block_count = (left << 4) | right
+      } else {
+        block_count = (header.extensions & 0xf000) >> 12
+      }
 
       let size = 0
 
@@ -93,7 +111,7 @@ function getSize_Origin(header) {
           size = blockSize
         }
       } else if (blockType === 1) {
-        size = blockCount * 32
+        size = block_count * 32
       }
 
       return 104 + size

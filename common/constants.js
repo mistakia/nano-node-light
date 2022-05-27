@@ -1,3 +1,5 @@
+export const QUORUM_THRESHOLD = 60000000000000000000000000000000000000n
+
 export const MAGIC_NUMBER = 'R'.charCodeAt(0)
 
 export const SELF_ADDRESS = Buffer.alloc(16, 0)
@@ -56,4 +58,8 @@ export const NETWORK = {
     PORT: 17075,
     TELEMETRY_CACHE_CUTOFF: 6e10 // 60 seconds
   }
+}
+
+export const CONFIRM_REQ_EXTENSIONS = {
+  CONFIRM_V2: 0x20
 }
