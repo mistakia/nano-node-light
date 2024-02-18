@@ -15,6 +15,8 @@ export const MESSAGE_TYPE = {
   BULK_PULL_ACCOUNT: 0x0b,
   TELEMETRY_REQ: 0x0c,
   TELEMETRY_ACK: 0x0d,
+  ASC_PULL_REQ: 0x0e,
+  ASC_PULL_ACK: 0x0f,
   PROTOCOL_UPGRADE: 0x1f
 }
 export const MESSAGE_TYPE_NAME = {
@@ -30,6 +32,8 @@ export const MESSAGE_TYPE_NAME = {
   [MESSAGE_TYPE.BULK_PULL_ACCOUNT]: 'BulkPullAccount',
   [MESSAGE_TYPE.TELEMETRY_REQ]: 'TelemetryReq',
   [MESSAGE_TYPE.TELEMETRY_ACK]: 'TelemetryAck',
+  [MESSAGE_TYPE.ASC_PULL_REQ]: 'AscPullReq',
+  [MESSAGE_TYPE.ASC_PULL_ACK]: 'AscPullAck',
   [MESSAGE_TYPE.PROTOCOL_UPGRADE]: 'ProtocolUpgrade'
 }
 
