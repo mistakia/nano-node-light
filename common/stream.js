@@ -1,31 +1,49 @@
 /*
   Nano Writable Stream
-   - Made By NSI (NoSecretImprove#5809)
- */
+*/
 
 import * as constants from './constants.js'
+import EventEmitter from 'events'
+
+class StreamError {
+  constructor(code) {
+      this.code = code
+  }
+}
+
+const Errors = {
+  UnsupportedNetwork: new StreamError('UNSUPPORTED_NETWORK'),
+  PayloadExceedsLimit: new StreamError('PAYLOAD_EXCEEDS_LIMIT'),
+  UnsupportedVersion: new StreamError('UNSUPPORTED_VERSION'),
+  InvalidOpCode: new StreamError('INVALID_OP_CODE') // Message Type
+}
+
+const MAX_PACKET_LENGTH = 1024
 
 function getDefault() {
   return {
     header: Buffer.alloc(8),
     headerLength: 0,
+
     message_type: null,
     version: null,
     extensions: null,
+
     bodySize: 0,
     expectedBodySize: null,
-    body: null
+    body: Buffer.alloc(MAX_PACKET_LENGTH)
   }
 }
 
 function setDefaultState(state) {
   state.headerLength = 0
+
   state.message_type = null
   state.version = null
   state.extensions = null
+
   state.bodySize = 0
   state.expectedBodySize = null
-  state.body = null
 }
 
 const blockSizes = {
@@ -105,6 +123,12 @@ function getSize_Origin(header) {
 
       return telemetryLength
     }
+    case constants.MESSAGE_TYPE.ASC_PULL_REQ: {
+      return 9 + header.extensions
+    }
+    case constants.MESSAGE_TYPE.ASC_PULL_ACK: {
+      return 9 + header.extensions
+    }
     case constants.MESSAGE_TYPE.PROTOCOL_UPGRADE: {
       return 0
     }
@@ -125,71 +149,69 @@ function getSize(header, mode) {
   }
 }
 
-function streamPacketBody(packet) {
-  const state = this.state
-
-  const bodyPtr = state.expectedBodySize - state.bodySize
-  const body = packet.subarray(0, bodyPtr)
-  state.body.set(body, state.bodySize)
-  state.bodySize += body.length
-
-  if (state.bodySize === state.expectedBodySize) {
-    const msgInfo = Object.assign({}, state)
-    delete msgInfo.bodySize
-    delete msgInfo.expectedBodySize
-    delete msgInfo.headerLength
-    delete msgInfo.header
-    this.emit('message', msgInfo)
-
-    setDefaultState(this.state)
-
-    const leftover = packet.subarray(bodyPtr)
-    if (leftover.length > 0) {
-      return this.streamPacket(leftover)
-    }
-  }
-}
-
-function streamPacket(packet) {
+function processStream(data) {
   if (!this.active) return
 
-  const state = this.state
+  let nextData = data
 
-  if (state.headerLength === 8) {
-    return this.streamPacketBody(packet)
-  } else {
-    const headerPtr = 8 - state.headerLength
-    const header = packet.subarray(0, headerPtr)
-    state.header.set(header, state.headerLength)
-    state.headerLength += header.length
+  for (;;) {
+    if (this.state.headerLength === 8) {
+      const bodyPtr = this.state.expectedBodySize - this.state.bodySize
+      const body = nextData.subarray(0, bodyPtr)
+      this.state.body.set(body, this.state.bodySize)
+      this.state.bodySize += body.length
 
-    if (state.headerLength === 8) {
-      if (state.header[0] !== constants.MAGIC_NUMBER) return true
-      if (state.header[1] !== this.network) return true
-      if (state.header[2] < 0x12) return true
-      if (state.header[3] !== 0x12) return true
-      if (state.header[4] > 0x12) return true
-      state.version = state.header[3]
-      state.message_type = state.header[5]
-      state.extensions = (state.header[7] << 8) + state.header[6]
-      const bodySize = getSize(state, this.streamMode)
+      if (this.state.bodySize === this.state.expectedBodySize) {
+        // Copy Message Body as it will be reused for next message.
+        const messageBody = Buffer.alloc(this.state.expectedBodySize)
+        this.state.body.copy(messageBody)
 
-      if (bodySize == null) return true
-      state.body = Buffer.alloc(bodySize)
-      state.expectedBodySize = bodySize
+        this.emit('message', {
+          body: messageBody,
+          extensions: this.state.extensions,
+          message_type: this.state.message_type,
+          remote_version: this.state.version
+        })
 
-      const leftover = packet.subarray(headerPtr)
-      return this.streamPacketBody(leftover)
+        setDefaultState(this.state)
+
+        nextData = nextData.subarray(bodyPtr)
+        if (nextData.length > 0) continue
+      }
+    } else {
+      const headerPtr = 8 - this.state.headerLength
+      const header = nextData.subarray(0, headerPtr)
+      this.state.header.set(header, this.state.headerLength)
+      this.state.headerLength += header.length
+
+      if (this.state.headerLength === 8) {
+        if (this.state.header[0] !== constants.MAGIC_NUMBER) throw Errors.UnsupportedNetwork
+        if (this.state.header[1] !== this.network) throw Errors.UnsupportedNetwork
+        if (this.state.header[3] < 0x12) throw Errors.UnsupportedVersion
+        if (this.state.header[4] > 0x13) throw Errors.UnsupportedVersion
+
+        this.state.version = this.state.header[3]
+        this.state.message_type = this.state.header[5]
+        this.state.extensions = (this.state.header[7] << 8) + this.state.header[6]
+        const bodySize = getSize(this.state, this.streamMode)
+
+        if (bodySize == null) throw Errors.InvalidOpCode
+        if (bodySize > MAX_PACKET_LENGTH) throw Errors.PayloadExceedsLimit
+
+        this.state.expectedBodySize = bodySize
+
+        nextData = nextData.subarray(headerPtr)
+        if (nextData.length > 0) continue
+      }
     }
+
+    break
   }
 }
 
-class NanoStream {
+class NanoStream extends EventEmitter {
   constructor(network = constants.NETWORK.BETA.ID) {
-    this._ev = {
-      message: [],
-      error: []
-    }
+    super()
 
     this.network = network
     this.state = getDefault()
@@ -202,52 +224,41 @@ class NanoStream {
   }
 
   process(packet) {
-    const result = this.streamPacket(packet)
+    this.isBusy = true
 
-    if (result) {
-      this.destroy()
-      this.emit('error')
-    } else {
-      const next = this.queue.shift()
-      if (next) {
-        this.process(next)
-      } else {
-        this.isBusy = false
+    let nextPacket = packet
+
+    while (nextPacket) {
+      try {
+        processStream.call(this, nextPacket)
+
+        nextPacket = this.queue.shift()
+      } catch (e) {
+        this.destroy(e)
+
+        return
       }
     }
+
+    this.isBusy = false
   }
 
-  destroy() {
+  destroy(e) {
     this.active = false
     this.queue = []
     this.isBusy = true
     delete this.state
+
+    this.emit('streamError', e) // Emitting error causes a Uncaught Exception
   }
 
   push(packet) {
     if (this.isBusy) {
       this.queue.push(packet)
     } else {
-      this.isBusy = true
       this.process(packet)
     }
   }
-
-  emit(evName, ...args) {
-    if (typeof this._ev[evName] === 'undefined') return
-    this._ev[evName].forEach(async function (listener) {
-      listener(...args)
-    })
-  }
-
-  on(evName, cb) {
-    if (!this._ev[evName])
-      throw Error("Event Name '" + evName + "' doesn't exist.")
-    this._ev[evName].push(cb)
-  }
 }
-
-NanoStream.prototype.streamPacket = streamPacket
-NanoStream.prototype.streamPacketBody = streamPacketBody
 
 export default NanoStream

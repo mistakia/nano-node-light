@@ -35,7 +35,7 @@ describe('Nano Stream', function () {
     const msg = msgs[0]
 
     expect(msg.message_type).to.equal(constants.MESSAGE_TYPE.NODE_ID_HANDSHAKE)
-    expect(msg.version).to.equal(18)
+    expect(msg.remote_version).to.equal(18)
     expect(msg.extensions).to.equal(3)
     expect(msg.body).to.equalBytes(Buffer.from(body, 'hex'))
   })
@@ -63,7 +63,7 @@ describe('Nano Stream', function () {
     const msg = msgs[0]
 
     expect(msg.message_type).to.equal(constants.MESSAGE_TYPE.NODE_ID_HANDSHAKE)
-    expect(msg.version).to.equal(18)
+    expect(msg.remote_version).to.equal(18)
     expect(msg.extensions).to.equal(3)
     expect(msg.body).to.equalBytes(Buffer.from(body, 'hex'))
   })
@@ -94,7 +94,7 @@ describe('Nano Stream', function () {
     const msg = msgs[0]
 
     expect(msg.message_type).to.equal(constants.MESSAGE_TYPE.NODE_ID_HANDSHAKE)
-    expect(msg.version).to.equal(18)
+    expect(msg.remote_version).to.equal(18)
     expect(msg.extensions).to.equal(3)
     expect(msg.body).to.equalBytes(Buffer.from(body, 'hex'))
   })
@@ -133,7 +133,7 @@ describe('Nano Stream', function () {
     expect(msg_a.message_type).to.equal(
       constants.MESSAGE_TYPE.NODE_ID_HANDSHAKE
     )
-    expect(msg_a.version).to.equal(18)
+    expect(msg_a.remote_version).to.equal(18)
     expect(msg_a.extensions).to.equal(3)
     expect(msg_a.body).to.equalBytes(Buffer.from(body, 'hex'))
 
@@ -142,7 +142,7 @@ describe('Nano Stream', function () {
     expect(msg_b.message_type).to.equal(
       constants.MESSAGE_TYPE.NODE_ID_HANDSHAKE
     )
-    expect(msg_b.version).to.equal(18)
+    expect(msg_b.remote_version).to.equal(18)
     expect(msg_b.extensions).to.equal(3)
     expect(msg_b.body).to.equalBytes(Buffer.from(body, 'hex'))
   })
