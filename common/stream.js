@@ -7,7 +7,7 @@ import EventEmitter from 'events'
 
 class StreamError {
   constructor(code) {
-      this.code = code
+    this.code = code
   }
 }
 
@@ -185,14 +185,17 @@ function processStream(data) {
       this.state.headerLength += header.length
 
       if (this.state.headerLength === 8) {
-        if (this.state.header[0] !== constants.MAGIC_NUMBER) throw Errors.UnsupportedNetwork
-        if (this.state.header[1] !== this.network) throw Errors.UnsupportedNetwork
+        if (this.state.header[0] !== constants.MAGIC_NUMBER)
+          throw Errors.UnsupportedNetwork
+        if (this.state.header[1] !== this.network)
+          throw Errors.UnsupportedNetwork
         if (this.state.header[3] < 0x12) throw Errors.UnsupportedVersion
         if (this.state.header[4] > 0x13) throw Errors.UnsupportedVersion
 
         this.state.version = this.state.header[3]
         this.state.message_type = this.state.header[5]
-        this.state.extensions = (this.state.header[7] << 8) + this.state.header[6]
+        this.state.extensions =
+          (this.state.header[7] << 8) + this.state.header[6]
         const bodySize = getSize(this.state, this.streamMode)
 
         if (bodySize == null) throw Errors.InvalidOpCode
