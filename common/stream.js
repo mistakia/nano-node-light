@@ -11,42 +11,42 @@ class StreamError {
   }
 }
 
-const Errors = {
-  UnsupportedNetwork: new StreamError('UNSUPPORTED_NETWORK'),
-  PayloadExceedsLimit: new StreamError('PAYLOAD_EXCEEDS_LIMIT'),
-  UnsupportedVersion: new StreamError('UNSUPPORTED_VERSION'),
-  InvalidOpCode: new StreamError('INVALID_OP_CODE') // Message Type
+const ERRORS = {
+  UNSUPPORTED_NETWORK: new StreamError('UNSUPPORTED_NETWORK'),
+  PAYLOAD_EXCEEDS_LIMIT: new StreamError('PAYLOAD_EXCEEDS_LIMIT'),
+  UNSUPPORTED_VERSION: new StreamError('UNSUPPORTED_VERSION'),
+  INVALID_OP_CODE: new StreamError('INVALID_OP_CODE') // Message Type
 }
 
 const MAX_PACKET_LENGTH = 1024
 
-function getDefault() {
+function get_default() {
   return {
     header: Buffer.alloc(8),
-    headerLength: 0,
+    header_length: 0,
 
     message_type: null,
     version: null,
     extensions: null,
 
-    bodySize: 0,
-    expectedBodySize: null,
+    body_size: 0,
+    expected_body_size: null,
     body: Buffer.alloc(MAX_PACKET_LENGTH)
   }
 }
 
-function setDefaultState(state) {
-  state.headerLength = 0
+function set_default_state(state) {
+  state.header_length = 0
 
   state.message_type = null
   state.version = null
   state.extensions = null
 
-  state.bodySize = 0
-  state.expectedBodySize = null
+  state.body_size = 0
+  state.expected_body_size = null
 }
 
-const blockSizes = {
+const BLOCK_SIZES = {
   0x00: 0, // Invalid
   0x01: 0, // Not A Block (NaB)
   0x02: 152, // Send (Legacy)
@@ -56,20 +56,20 @@ const blockSizes = {
   0x06: 216 // State
 }
 
-function getSize_Origin(header) {
+function get_size_origin(header) {
   switch (header.message_type) {
     case constants.MESSAGE_TYPE.KEEPALIVE: {
       return 144
     }
     case constants.MESSAGE_TYPE.PUBLISH: {
-      const blockType = (header.extensions & 0x0f00) >> 8
-      const blockSize = blockSizes[blockType]
+      const block_type = (header.extensions & 0x0f00) >> 8
+      const block_size = BLOCK_SIZES[block_type]
 
-      if (blockSize) return blockSize
+      if (block_size) return block_size
       return 0
     }
     case constants.MESSAGE_TYPE.CONFIRM_REQ: {
-      const blockType = (header.extensions & 0x0f00) >> 8
+      const block_type = (header.extensions & 0x0f00) >> 8
       const is_v2 = (header.extensions & 0x01) !== 0
       let block_count
 
@@ -81,17 +81,17 @@ function getSize_Origin(header) {
         block_count = (header.extensions & 0xf000) >> 12
       }
 
-      if (blockType !== 0 && blockType !== 1) {
-        const blockSize = blockSizes[blockType]
-        if (blockSize) return blockSize
-      } else if (blockType === 1) {
+      if (block_type !== 0 && block_type !== 1) {
+        const block_size = BLOCK_SIZES[block_type]
+        if (block_size) return block_size
+      } else if (block_type === 1) {
         return block_count * 64
       }
 
       return 0
     }
     case constants.MESSAGE_TYPE.CONFIRM_ACK: {
-      const blockType = (header.extensions & 0x0f00) >> 8
+      const block_type = (header.extensions & 0x0f00) >> 8
       const is_v2 = (header.extensions & 0x01) !== 0
       let block_count
 
@@ -105,30 +105,30 @@ function getSize_Origin(header) {
 
       let size = 0
 
-      if (blockType !== 0 && blockType !== 1) {
-        const blockSize = blockSizes[blockType]
-        if (blockSize) {
-          size = blockSize
+      if (block_type !== 0 && block_type !== 1) {
+        const block_size = BLOCK_SIZES[block_type]
+        if (block_size) {
+          size = block_size
         }
-      } else if (blockType === 1) {
+      } else if (block_type === 1) {
         size = block_count * 32
       }
 
       return 104 + size
     }
     case constants.MESSAGE_TYPE.BULK_PULL: {
-      const extendedLength = header.extensions & 0x1 && 8
+      const extended_length = header.extensions & 0x1 && 8
 
-      return 64 + extendedLength
+      return 64 + extended_length
     }
     case constants.MESSAGE_TYPE.FRONTIER_REQ: {
       return 40
     }
     case constants.MESSAGE_TYPE.NODE_ID_HANDSHAKE: {
-      const queryLength = header.extensions & 0x1 && 32
-      const responseLength = header.extensions & 0x2 && 96
+      const query_length = header.extensions & 0x1 && 32
+      const response_length = header.extensions & 0x2 && 96
 
-      return queryLength + responseLength
+      return query_length + response_length
     }
     case constants.MESSAGE_TYPE.BULK_PULL_ACCOUNT: {
       return 49
@@ -137,9 +137,9 @@ function getSize_Origin(header) {
       return 0
     }
     case constants.MESSAGE_TYPE.TELEMETRY_ACK: {
-      const telemetryLength = header.extensions & 0x3ff
+      const telemetry_length = header.extensions & 0x3ff
 
-      return telemetryLength
+      return telemetry_length
     }
     case constants.MESSAGE_TYPE.ASC_PULL_REQ: {
       return 9 + header.extensions
@@ -155,74 +155,74 @@ function getSize_Origin(header) {
   return null
 }
 
-function getSize_Light(header) {
+function get_size_light(header) {
   return null
 }
 
-function getSize(header, mode) {
+function get_size(header, mode) {
   if (mode === 1) {
-    return getSize_Light(header)
+    return get_size_light(header)
   } else {
-    return getSize_Origin(header)
+    return get_size_origin(header)
   }
 }
 
-function processStream(data) {
+function process_stream(data) {
   if (!this.active) return
 
-  let nextData = data
+  let next_data = data
 
   for (;;) {
-    if (this.state.headerLength === 8) {
-      const bodyPtr = this.state.expectedBodySize - this.state.bodySize
-      const body = nextData.subarray(0, bodyPtr)
-      this.state.body.set(body, this.state.bodySize)
-      this.state.bodySize += body.length
+    if (this.state.header_length === 8) {
+      const body_ptr = this.state.expected_body_size - this.state.body_size
+      const body = next_data.subarray(0, body_ptr)
+      this.state.body.set(body, this.state.body_size)
+      this.state.body_size += body.length
 
-      if (this.state.bodySize === this.state.expectedBodySize) {
+      if (this.state.body_size === this.state.expected_body_size) {
         // Copy Message Body as it will be reused for next message.
-        const messageBody = Buffer.alloc(this.state.expectedBodySize)
-        this.state.body.copy(messageBody)
+        const message_body = Buffer.alloc(this.state.expected_body_size)
+        this.state.body.copy(message_body)
 
         this.emit('message', {
-          body: messageBody,
+          body: message_body,
           extensions: this.state.extensions,
           message_type: this.state.message_type,
           remote_version: this.state.version
         })
 
-        setDefaultState(this.state)
+        set_default_state(this.state)
 
-        nextData = nextData.subarray(bodyPtr)
-        if (nextData.length > 0) continue
+        next_data = next_data.subarray(body_ptr)
+        if (next_data.length > 0) continue
       }
     } else {
-      const headerPtr = 8 - this.state.headerLength
-      const header = nextData.subarray(0, headerPtr)
-      this.state.header.set(header, this.state.headerLength)
-      this.state.headerLength += header.length
+      const header_ptr = 8 - this.state.header_length
+      const header = next_data.subarray(0, header_ptr)
+      this.state.header.set(header, this.state.header_length)
+      this.state.header_length += header.length
 
-      if (this.state.headerLength === 8) {
+      if (this.state.header_length === 8) {
         if (this.state.header[0] !== constants.MAGIC_NUMBER)
-          throw Errors.UnsupportedNetwork
+          throw ERRORS.UNSUPPORTED_NETWORK
         if (this.state.header[1] !== this.network)
-          throw Errors.UnsupportedNetwork
-        if (this.state.header[3] < 0x12) throw Errors.UnsupportedVersion
-        if (this.state.header[4] > 0x13) throw Errors.UnsupportedVersion
+          throw ERRORS.UNSUPPORTED_NETWORK
+        if (this.state.header[3] < 0x12) throw ERRORS.UNSUPPORTED_VERSION
+        if (this.state.header[4] > 0x13) throw ERRORS.UNSUPPORTED_VERSION
 
         this.state.version = this.state.header[3]
         this.state.message_type = this.state.header[5]
         this.state.extensions =
           (this.state.header[7] << 8) + this.state.header[6]
-        const bodySize = getSize(this.state, this.streamMode)
+        const body_size = get_size(this.state, this.stream_mode)
 
-        if (bodySize == null) throw Errors.InvalidOpCode
-        if (bodySize > MAX_PACKET_LENGTH) throw Errors.PayloadExceedsLimit
+        if (body_size == null) throw ERRORS.INVALID_OP_CODE
+        if (body_size > MAX_PACKET_LENGTH) throw ERRORS.PAYLOAD_EXCEEDS_LIMIT
 
-        this.state.expectedBodySize = bodySize
+        this.state.expected_body_size = body_size
 
-        nextData = nextData.subarray(headerPtr)
-        if (nextData.length > 0) continue
+        next_data = next_data.subarray(header_ptr)
+        if (next_data.length > 0) continue
       }
     }
 
@@ -235,25 +235,25 @@ class NanoStream extends EventEmitter {
     super()
 
     this.network = network
-    this.state = getDefault()
-    this.isBusy = false
+    this.state = get_default()
+    this.is_busy = false
     this.queue = []
 
-    this.streamMode = 0
+    this.stream_mode = 0
 
     this.active = true
   }
 
   process(packet) {
-    this.isBusy = true
+    this.is_busy = true
 
-    let nextPacket = packet
+    let next_packet = packet
 
-    while (nextPacket) {
+    while (next_packet) {
       try {
-        processStream.call(this, nextPacket)
+        process_stream.call(this, next_packet)
 
-        nextPacket = this.queue.shift()
+        next_packet = this.queue.shift()
       } catch (e) {
         this.destroy(e)
 
@@ -261,20 +261,20 @@ class NanoStream extends EventEmitter {
       }
     }
 
-    this.isBusy = false
+    this.is_busy = false
   }
 
   destroy(e) {
     this.active = false
     this.queue = []
-    this.isBusy = true
+    this.is_busy = true
     delete this.state
 
-    this.emit('streamError', e) // Emitting error causes a Uncaught Exception
+    this.emit('stream_error', e) // Emitting error causes a Uncaught Exception
   }
 
   push(packet) {
-    if (this.isBusy) {
+    if (this.is_busy) {
       this.queue.push(packet)
     } else {
       this.process(packet)

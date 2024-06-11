@@ -4,7 +4,7 @@ import bytes from 'chai-bytes'
 
 import NanoNode from '#lib/nano-node.js'
 
-import { createServerNode, createClientNode } from '#test/utils.js'
+import { create_server_node, create_client_node } from '#test/utils.js'
 
 chai.use(bytes)
 const { expect } = chai
@@ -15,7 +15,7 @@ describe('Nano Node', function () {
   this.timeout(5000)
 
   it('handshake between server and client', async () => {
-    const node_a = await createServerNode()
+    const node_a = await create_server_node()
     const node_b = new NanoNode()
 
     let handshake_a
@@ -30,8 +30,12 @@ describe('Nano Node', function () {
         node_a.on('handshake', (message) => {
           handshake_a = message
           try {
-            expect(handshake_a.nodeId).to.equalBytes(node_b.nodeKey.public)
-            expect(handshake_b.nodeId).to.equalBytes(node_a.nodeKey.public)
+            expect(handshake_a.node_id).to.equalBytes(
+              node_b.node_key.public_key_buf
+            )
+            expect(handshake_b.node_id).to.equalBytes(
+              node_a.node_key.public_key_buf
+            )
             resolve()
           } catch (err) {
             reject(err)
@@ -41,17 +45,17 @@ describe('Nano Node', function () {
 
     // connect to node_a
     const { address, port } = node_a.server.address()
-    node_b.connectAddress({ address, port })
+    node_b.connect_address({ address, port })
 
     await waitForHandshake()
   })
 
   it('node stop, close server and sockets', async () => {
-    const serverNode = await createServerNode()
+    const serverNode = await create_server_node()
     const clientCount = 20
     const clientNodes = []
     for (let i = 0; i < clientCount; i++) {
-      const node = await createClientNode(serverNode)
+      const node = await create_client_node(serverNode)
       clientNodes.push(node)
     }
 

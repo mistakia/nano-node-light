@@ -1,6 +1,6 @@
 import NanoNode from '#lib/nano-node.js'
 
-export const createServerNode = () =>
+export const create_server_node = () =>
   new Promise((resolve, reject) => {
     try {
       const node = new NanoNode()
@@ -13,10 +13,10 @@ export const createServerNode = () =>
     }
   })
 
-export const createClientNode = (serverNode) => {
+export const create_client_node = (serverNode) => {
   const node = new NanoNode()
   // connect to server
   const { address, port } = serverNode.server.address()
-  node.connectAddress({ address, port })
+  node.connect_address({ address, port })
   return node
 }

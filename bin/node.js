@@ -10,23 +10,14 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('bin')
 debug.enable('*')
 
-const getNetwork = (network = 'beta') => {
-  switch (network) {
-    case 'live':
-      return constants.NETWORK.LIVE
-    case 'beta':
-      return constants.NETWORK.BETA
-    case 'test':
-      return constants.NETWORK.TEST
-    default:
-      return constants.NETWORK.BETA
-  }
+const get_network = (network = 'live') => {
+  return constants.NETWORK[network.toUpperCase()] || constants.NETWORK.BETA
 }
 
-const network = getNetwork(argv.network)
+const network = get_network(argv.network)
 const config = {
   network,
-  requestTelemetry: argv.telemetry
+  request_telemetry: argv.telemetry
 }
 const node = new NanoNode(config)
 
@@ -39,7 +30,7 @@ node.on('telemetry', (telemetry) => {
 })
 
 // connect to network bootstrap peers
-node.connectDomain({
+node.connect_domain({
   address: network.ADDRESS,
   port: network.PORT
 })

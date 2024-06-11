@@ -8,7 +8,7 @@ import * as constants from '#common/constants.js'
 chai.use(bytes)
 const { expect } = chai
 
-const waitForMessage = ({ stream, count = 1 }) =>
+const wait_for_message = ({ stream, count = 1 }) =>
   new Promise((resolve, reject) => {
     const msgs = []
     stream.on('message', (msg) => {
@@ -23,7 +23,7 @@ describe('Nano Stream', function () {
   it('process handshake message, one chunk', async () => {
     const stream = new NanoStream(constants.NETWORK.BETA.ID)
 
-    const msgs_p = waitForMessage({ stream })
+    const msgs_p = wait_for_message({ stream })
 
     const header = '52421212120a0300'
     const body =
@@ -43,7 +43,7 @@ describe('Nano Stream', function () {
   it('process handshake message, two random chunks', async () => {
     const stream = new NanoStream(constants.NETWORK.BETA.ID)
 
-    const msgs_p = waitForMessage({ stream })
+    const msgs_p = wait_for_message({ stream })
 
     const header = '52421212120a0300'
     const body =
@@ -71,7 +71,7 @@ describe('Nano Stream', function () {
   it('process handshake message, three chunks', async () => {
     const stream = new NanoStream(constants.NETWORK.BETA.ID)
 
-    const msgs_p = waitForMessage({ stream })
+    const msgs_p = wait_for_message({ stream })
 
     const body =
       'c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f8950285ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c111401'
@@ -102,7 +102,7 @@ describe('Nano Stream', function () {
   it('process multiple handshake messages', async () => {
     const stream = new NanoStream(constants.NETWORK.BETA.ID)
 
-    const msgs_p = waitForMessage({ stream })
+    const msgs_p = wait_for_message({ stream })
 
     const body =
       'c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f8950285ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c111401'
