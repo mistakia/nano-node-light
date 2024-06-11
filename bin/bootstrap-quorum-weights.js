@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import NanoNode from '#lib/nano-node.js'
 import { FrontierReq, BulkPull } from '#lib/bootstrap.js'
-import { constants, decodeAddress } from '#common'
+import { constants, decode_address } from '#common'
 import seed_accounts from '#common/seed-accounts.js'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -17,7 +17,9 @@ const get_network = (network = 'live') => {
 const network = get_network(argv.network)
 const node = new NanoNode({ network, telemetry: true })
 
-node.on('error', () => {})
+node.on('error', (error) => {
+  log(error)
+})
 
 const setup_client = (Client_Constructor, event_name) => {
   const client = new Client_Constructor({
@@ -41,13 +43,13 @@ const get_account_frontier = async (account_public_key) => {
   const block = await new Promise((resolve) =>
     frontier_req_client.once('frontier', resolve)
   )
-  bulk_pull_client.request({ start: block.Frontier, count: 1 })
+  bulk_pull_client.request({ start: block.frontier_hash_buf, count: 1 })
 
   const block_info = await new Promise((resolve) =>
     bulk_pull_client.once('block', resolve)
   )
   return {
-    frontier_hash: block.Frontier.toString('hex'),
+    frontier_hash: block.frontier_hash_buf.toString('hex'),
     block_info: block_info
   }
 }
@@ -64,8 +66,12 @@ const bootstrap_quorum_weights = async () => {
   const frontiers = []
 
   for (const account_address of seed_accounts) {
-    const { publicKey } = decodeAddress({ address: account_address })
-    const { frontier_hash, block_info } = await get_account_frontier(publicKey)
+    const { public_key: account_public_key } = decode_address({
+      address: account_address
+    })
+    const { frontier_hash, block_info } = await get_account_frontier(
+      account_public_key
+    )
     frontiers.push({
       block_hash: frontier_hash,
       previous_block_hash_buffer: block_info.previous_hash,
@@ -81,5 +87,5 @@ const bootstrap_quorum_weights = async () => {
   await node.bootstrap_quorum_weights_from_frontiers({ frontiers })
 }
 
-node.connectDomain({ address: network.ADDRESS, port: network.PORT })
+node.connect_domain({ address: network.ADDRESS, port: network.PORT })
 bootstrap_quorum_weights()

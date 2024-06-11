@@ -59,7 +59,3 @@ export const NETWORK = {
     TELEMETRY_CACHE_CUTOFF: 6e10 // 60 seconds
   }
 }
-
-export const CONFIRM_REQ_EXTENSIONS = {
-  CONFIRM_V2: 0x20
-}

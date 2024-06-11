@@ -76,8 +76,8 @@ function decode_state_block(data) {
   }
 }
 
-export function decodeBlock({ block, blockType }) {
-  switch (blockType) {
+export function decode_block({ block, block_type }) {
+  switch (block_type) {
     case 2: // send
       return decode_send_block(block)
     case 3: // receive
@@ -91,9 +91,9 @@ export function decodeBlock({ block, blockType }) {
   }
 }
 
-export function encodeMessage({
+export function encode_message({
   message,
-  messageType,
+  message_type,
   extensions,
   network = constants.NETWORK.BETA.ID
 }) {
@@ -104,14 +104,14 @@ export function encodeMessage({
   packet[2] = 0x13
   packet[3] = 0x13
   packet[4] = 0x12
-  packet[5] = messageType
+  packet[5] = message_type
   packet.writeUInt16LE(extensions, 6)
   packet.set(message, 8)
   return packet
 }
 
-export function decodeConnectionInfo(raw) {
-  const address = encodeIPv6(raw.subarray(0, 16))
+export function decode_connection_info(raw) {
+  const address = encode_ipv6(raw.subarray(0, 16))
   const port = raw.readUInt16LE(16)
   return {
     address,
@@ -119,49 +119,49 @@ export function decodeConnectionInfo(raw) {
   }
 }
 
-export function encodeConnectionInfo({ address, port }) {
+export function encode_connection_info({ address, port }) {
   const raw = Buffer.alloc(18)
   raw.set(ip6addr.parse(address).toBuffer())
   raw.writeUInt16LE(port, 16)
   return raw
 }
 
-export function decodeAddress({ address }) {
+export function decode_address({ address }) {
   const cleaned_address = address.replace('nano_', '').replace('xrb_', '')
   const decoded = decodeNanoBase32(cleaned_address)
-  const publicKey = ab2hex(decoded.subarray(0, 32))
+  const public_key = ab2hex(decoded.subarray(0, 32))
   const checksum = ab2hex(decoded.subarray(32, 32 + 5))
   return {
-    publicKey,
+    public_key,
     checksum
   }
 }
 
-export function encodeAddress({ publicKey, prefix = 'nano_' }) {
-  const encodedPublicKey = encodeNanoBase32(publicKey)
-  const checksum = ed25519.hash(publicKey, 5).reverse()
-  const encodedChecksum = encodeNanoBase32(checksum)
-  return prefix + encodedPublicKey + encodedChecksum
+export function encode_address({ public_key_buf, prefix = 'nano_' }) {
+  const encoded_public_key = encodeNanoBase32(public_key_buf)
+  const checksum = ed25519.hash(public_key_buf, 5).reverse()
+  const encoded_checksum = encodeNanoBase32(checksum)
+  return prefix + encoded_public_key + encoded_checksum
 }
 
-export function encodeIPv4(raw) {
+export function encode_ipv4(raw) {
   return `${raw[0]}.${raw[1]}.${raw[2]}.${raw[3]}`
 }
 
-export function encodeIPv6(raw) {
+export function encode_ipv6(raw) {
   const hex = raw.toString('hex')
   const hexParts = hex.match(/.{1,4}/g)
   const subnet = hexParts[5]
   let formattedAddress
   if (subnet === 'ffff') {
-    formattedAddress = '::ffff:' + encodeIPv4(raw.slice(-4))
+    formattedAddress = '::ffff:' + encode_ipv4(raw.slice(-4))
   } else {
     formattedAddress = hexParts.join(':')
   }
   return formattedAddress
 }
 
-export function decodeNodeHandshake({ packet, extensions }) {
+export function decode_node_handshake({ packet, extensions }) {
   const hasQuery = !!(extensions & 1)
   const hasResponse = !!(extensions & 2)
 
@@ -189,7 +189,7 @@ export function decodeNodeHandshake({ packet, extensions }) {
 
 const votePrefix = Buffer.from('vote ')
 
-export function decodeVote({ body, extensions }) {
+export function decode_vote({ body, extensions }) {
   // Determine version based on the presence of the flag in the extensions
   const is_v2 = (extensions & 0x1) !== 0 // Assuming bit 0 is the v2 flag
   const vote_count = is_v2
@@ -225,7 +225,7 @@ export function decodeVote({ body, extensions }) {
   }
 }
 
-export function decodeTelemetry({ body, extensions }) {
+export function decode_telemetry({ body, extensions }) {
   const signature = body.subarray(0, 64)
   const node_id = body.subarray(64, 96)
   const block_count = body.readBigUInt64BE(96)
