@@ -2,13 +2,13 @@
 
 Release Dependencies are dependencies which are inside of "dependencies" of package.json, or is installed on Release Builds.
 
-All Release Dependencies and its Nested Dependencies MUST be deeply audited. All Release Dependencies, and its Nested Dependencies MUST be set to an absolute fixed version.
+All Release Dependencies and its Nested Dependencies MUST be audited. All Release Dependencies, and its Nested Dependencies MUST be set to an absolute fixed version.
 
 # Developer Dependencies
 
 Developer Dependencies are dependencies which are inside of "devDependencies" of package.json, or is used under Development of this Repository.
 
-All Developer Dependencies and its Nested Dependencies must be trusted or deeply audited.
+All Developer Dependencies and its Nested Dependencies must be trusted or audited.
 
 # Use of Signatures
 
@@ -16,5 +16,5 @@ No signature shall be of a direct input of the User, Node, Peer or otherwise. Al
 
 ```
 Example of Bad Signature: Peer asks Node to sign a "Cookie" and the Node returns said signature, without modifying it to prevent Signature Injection.
-Example of Good Signature: Peer requests vote, and the Node returns Signature of a Hash of the Requested Vote.
+Example of Good Signature: Peer requests vote, and the Node returns Signature of a Hash of the Requested Vote + a salt or prefix.
 ```
