@@ -18,7 +18,7 @@ const ERRORS = {
   INVALID_OP_CODE: new StreamError('INVALID_OP_CODE') // Message Type
 }
 
-const MAX_PACKET_LENGTH = 1024
+const MAX_PACKET_LENGTH = 1024 * 65
 
 function get_default() {
   return {
@@ -46,16 +46,6 @@ function set_default_state(state) {
   state.expected_body_size = null
 }
 
-const BLOCK_SIZES = {
-  0x00: 0, // Invalid
-  0x01: 0, // Not A Block (NaB)
-  0x02: 152, // Send (Legacy)
-  0x03: 136, // Receive (Legacy)
-  0x04: 168, // Open (Legacy)
-  0x05: 136, // Change (Legacy)
-  0x06: 216 // State
-}
-
 function get_size_origin(header) {
   switch (header.message_type) {
     case constants.MESSAGE_TYPE.KEEPALIVE: {
@@ -63,7 +53,7 @@ function get_size_origin(header) {
     }
     case constants.MESSAGE_TYPE.PUBLISH: {
       const block_type = (header.extensions & 0x0f00) >> 8
-      const block_size = BLOCK_SIZES[block_type]
+      const block_size = constants.BLOCK_SIZES[block_type]
 
       if (block_size) return block_size
       return 0
@@ -82,7 +72,7 @@ function get_size_origin(header) {
       }
 
       if (block_type !== 0 && block_type !== 1) {
-        const block_size = BLOCK_SIZES[block_type]
+        const block_size = constants.BLOCK_SIZES[block_type]
         if (block_size) return block_size
       } else if (block_type === 1) {
         return block_count * 64
@@ -106,7 +96,7 @@ function get_size_origin(header) {
       let size = 0
 
       if (block_type !== 0 && block_type !== 1) {
-        const block_size = BLOCK_SIZES[block_type]
+        const block_size = constants.BLOCK_SIZES[block_type]
         if (block_size) {
           size = block_size
         }
@@ -126,7 +116,7 @@ function get_size_origin(header) {
     }
     case constants.MESSAGE_TYPE.NODE_ID_HANDSHAKE: {
       const query_length = header.extensions & 0x1 && 32
-      const response_length = header.extensions & 0x2 && 96
+      const response_length = header.extensions & 0x2 && 160
 
       return query_length + response_length
     }
@@ -207,8 +197,10 @@ function process_stream(data) {
           throw ERRORS.UNSUPPORTED_NETWORK
         if (this.state.header[1] !== this.network)
           throw ERRORS.UNSUPPORTED_NETWORK
-        if (this.state.header[3] < 0x12) throw ERRORS.UNSUPPORTED_VERSION
-        if (this.state.header[4] > 0x13) throw ERRORS.UNSUPPORTED_VERSION
+        if (this.state.header[3] < constants.MINIMUM_PROTOCOL_VERSION)
+          throw ERRORS.UNSUPPORTED_VERSION
+        if (this.state.header[4] > constants.MAXIMUM_PROTOCOL_VERSION)
+          throw ERRORS.UNSUPPORTED_VERSION
 
         this.state.version = this.state.header[3]
         this.state.message_type = this.state.header[5]

@@ -4,6 +4,14 @@ export const MAGIC_NUMBER = 'R'.charCodeAt(0)
 
 export const SELF_ADDRESS = Buffer.alloc(16, 0)
 
+export const QUERY_FLAG = 0
+export const RESPONSE_FLAG = 1
+export const V2_FLAG = 2
+
+export const MINIMUM_PROTOCOL_VERSION = 0x14
+export const CURRENT_PROTOCOL_VERSION = 0x15
+export const MAXIMUM_PROTOCOL_VERSION = 0x15
+
 export const MESSAGE_TYPE = {
   INVALID: 0x00,
   NAT: 0x01,
@@ -39,23 +47,38 @@ export const MESSAGE_TYPE_NAME = {
   [MESSAGE_TYPE.PROTOCOL_UPGRADE]: 'ProtocolUpgrade'
 }
 
+export const BLOCK_SIZES = {
+  0x00: 0, // Invalid
+  0x01: 0, // Not A Block (NaB)
+  0x02: 152, // Send (Legacy)
+  0x03: 136, // Receive (Legacy)
+  0x04: 168, // Open (Legacy)
+  0x05: 136, // Change (Legacy)
+  0x06: 216 // State
+}
+
 export const NETWORK = {
   LIVE: {
     ID: 'C'.charCodeAt(0),
     ADDRESS: 'peering.nano.org',
     PORT: 7075,
-    TELEMETRY_CACHE_CUTOFF: 6e10 // 60 seconds
+    TELEMETRY_CACHE_CUTOFF: 6e10, // 60 seconds,
+    GENESIS_BLOCK:
+      '991CF190094C00F0B68E2E5F75F6BEE95A2E0BD93CEAA4A6734DB9F19B728948'
   },
   BETA: {
     ID: 'B'.charCodeAt(0),
     ADDRESS: 'peering-beta.nano.org',
     PORT: 54000,
-    TELEMETRY_CACHE_CUTOFF: 15e9 // 15 seconds
+    TELEMETRY_CACHE_CUTOFF: 15e9, // 15 seconds,
+    GENESIS_BLOCK:
+      'E1227CF974C1455A8B630433D94F3DDBF495EEAC9ADD2481A4A1D90A0D00F488'
   },
   TEST: {
     ID: 'X'.charCodeAt(0),
     ADDRESS: 'peering-test.nano.org',
     PORT: 17075,
-    TELEMETRY_CACHE_CUTOFF: 6e10 // 60 seconds
+    TELEMETRY_CACHE_CUTOFF: 6e10, // 60 seconds,
+    GENESIS_BLOCK: '' // TODO
   }
 }

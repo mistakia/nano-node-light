@@ -101,9 +101,9 @@ export function encode_message({
   const packet = Buffer.alloc(8 + messageLength)
   packet[0] = constants.MAGIC_NUMBER
   packet[1] = network
-  packet[2] = 0x13
-  packet[3] = 0x13
-  packet[4] = 0x12
+  packet[2] = constants.MAXIMUM_PROTOCOL_VERSION
+  packet[3] = constants.CURRENT_PROTOCOL_VERSION
+  packet[4] = constants.MINIMUM_PROTOCOL_VERSION
   packet[5] = message_type
   packet.writeUInt16LE(extensions, 6)
   packet.set(message, 8)
@@ -162,25 +162,59 @@ export function encode_ipv6(raw) {
 }
 
 export function decode_node_handshake({ packet, extensions }) {
-  const hasQuery = !!(extensions & 1)
-  const hasResponse = !!(extensions & 2)
+  // Check flags using constants
+  const has_query = !!(extensions & (1 << constants.QUERY_FLAG))
+  const has_response = !!(extensions & (1 << constants.RESPONSE_FLAG))
+  const is_v2 = !!(extensions & (1 << constants.V2_FLAG))
 
   let query
   let response
-  let extraPtr = 0
-  if (hasQuery) {
+  let packet_offset = 0
+
+  // Handle query (32 bytes cookie)
+  if (has_query) {
     query = packet.subarray(0, 32)
-    extraPtr = 32
+    packet_offset = 32
   }
-  if (hasResponse) {
-    const responseX = packet.subarray(extraPtr, 96 + extraPtr)
-    const account = responseX.subarray(0, 32)
-    const signature = responseX.subarray(32, 96)
-    response = {
-      account,
-      signature
+
+  // Handle response
+  if (has_response) {
+    if (is_v2) {
+      // V2 response format:
+      // - account (32 bytes)
+      // - salt (32 bytes)
+      // - genesis (32 bytes)
+      // - signature (64 bytes)
+      const responseData = packet.subarray(packet_offset)
+
+      // The signature is the last 64 bytes
+      const account = responseData.subarray(0, 32)
+      const salt = responseData.subarray(32, 64)
+      const genesis = responseData.subarray(64, 96)
+      const signature = responseData.subarray(96)
+
+      response = {
+        account,
+        salt,
+        genesis,
+        signature
+      }
+    } else {
+      // Legacy v1 response format:
+      // - account (32 bytes)
+      // - signature (64 bytes)
+      const responseData = packet.subarray(packet_offset)
+
+      const account = responseData.subarray(0, 32)
+      const signature = responseData.subarray(32)
+
+      response = {
+        account,
+        signature
+      }
     }
   }
+
   return {
     query,
     response
