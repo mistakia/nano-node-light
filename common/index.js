@@ -111,8 +111,10 @@ export function encode_message({
 }
 
 export function decode_connection_info(raw) {
-  const address = encode_ipv6(raw.subarray(0, 16))
-  const port = raw.readUInt16LE(16)
+  // Convert binary string to Buffer if needed
+  const buf = typeof raw === 'string' ? Buffer.from(raw, 'binary') : raw
+  const address = encode_ipv6(buf.subarray(0, 16))
+  const port = buf.readUInt16LE(16)
   return {
     address,
     port

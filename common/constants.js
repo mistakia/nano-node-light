@@ -12,6 +12,8 @@ export const MINIMUM_PROTOCOL_VERSION = 0x14
 export const CURRENT_PROTOCOL_VERSION = 0x15
 export const MAXIMUM_PROTOCOL_VERSION = 0x15
 
+export const KEEPALIVE_INTERVAL = 15 * 1000
+
 export const MESSAGE_TYPE = {
   INVALID: 0x00,
   NAT: 0x01,
