@@ -449,14 +449,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@trashman/ed25519-blake2b@npm:^0.0.3":
-  version: 0.0.3
-  resolution: "@trashman/ed25519-blake2b@npm:0.0.3"
+"@trashman/ed25519-blake2b@npm:^0.0.7":
+  version: 0.0.7
+  resolution: "@trashman/ed25519-blake2b@npm:0.0.7"
   dependencies:
-    napi-macros: "npm:^2.0.0"
+    napi-macros: "npm:2.0.0"
     node-gyp: "npm:latest"
-    node-gyp-build: "npm:^4.4.0"
-  checksum: 10/b2836b7969797ba83ea35c48f11de9c77da596731524b889726c38dce07507fd4ad0422bb0b2a839501ea1cd8c71accd4acf7db6735f43803258bfe810d6fe73
+    node-gyp-build: "npm:4.4.0"
+  checksum: 10/1f6de610ae5521e39bd27498e3b8bad48a39aaec309d5826572cdef12bf8bfb743bf830704bc2c0556d86c40713d618c465b62da1649b33a44fd5e1ed9912c8d
   languageName: node
   linkType: hard
 
@@ -2667,7 +2667,7 @@ __metadata:
   dependencies:
     "@babel/core": "npm:^7.17.9"
     "@babel/eslint-parser": "npm:^7.17.0"
-    "@trashman/ed25519-blake2b": "npm:^0.0.3"
+    "@trashman/ed25519-blake2b": "npm:^0.0.7"
     chai: "npm:^4.3.6"
     chai-bytes: "npm:^0.1.2"
     debug: "npm:^4.3.4"
@@ -2692,10 +2692,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"napi-macros@npm:^2.0.0":
-  version: 2.2.2
-  resolution: "napi-macros@npm:2.2.2"
-  checksum: 10/2cdb9c40ad4b424b14fbe5e13c5329559e2b511665acf41cdcda172fd2270202dc747a2d288b687c72bc70f654c797bc24a93adb67631128d62461588d7cc070
+"napi-macros@npm:2.0.0":
+  version: 2.0.0
+  resolution: "napi-macros@npm:2.0.0"
+  checksum: 10/6ffa499356a09727d4a622bc68a9c22996adfb9b95e0d4426be9084b73dd1f0dc8f78adf7e86b560ac463e3ce1707a57dd2644f858dcbb303c36fb8bb3d915b2
   languageName: node
   linkType: hard
 
@@ -2713,14 +2713,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-gyp-build@npm:^4.4.0":
-  version: 4.8.0
-  resolution: "node-gyp-build@npm:4.8.0"
+"node-gyp-build@npm:4.4.0":
+  version: 4.4.0
+  resolution: "node-gyp-build@npm:4.4.0"
   bin:
     node-gyp-build: bin.js
     node-gyp-build-optional: optional.js
     node-gyp-build-test: build-test.js
-  checksum: 10/80f410ab412df38e84171d3634a5716b6c6f14ecfa4eb971424d289381fb76f8bcbe1b666419ceb2c81060e558fd7c6d70cc0f60832bcca6a1559098925d9657
+  checksum: 10/a2f77e622ed738209f20ee808c812fe5697c3c641b76b6a369b989a810ed40d1a7f5e7687ca0ea5987363697c284f1c75cdc8164e8cfdd5e6ff3bae17e9898ff
   languageName: node
   linkType: hard
 
