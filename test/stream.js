@@ -25,9 +25,9 @@ describe('Nano Stream', function () {
 
     const msgs_p = wait_for_message({ stream })
 
-    const header = '52421212120a0300'
+    const header = '52421414140a0300'
     const body =
-      'c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f8950285ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c111401'
+      'c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f8950285ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c11140100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
 
     stream.push(Buffer.from(header + body, 'hex'))
 
@@ -35,7 +35,7 @@ describe('Nano Stream', function () {
     const msg = msgs[0]
 
     expect(msg.message_type).to.equal(constants.MESSAGE_TYPE.NODE_ID_HANDSHAKE)
-    expect(msg.remote_version).to.equal(18)
+    expect(msg.remote_version).to.equal(20)
     expect(msg.extensions).to.equal(3)
     expect(msg.body).to.equalBytes(Buffer.from(body, 'hex'))
   })
@@ -45,9 +45,9 @@ describe('Nano Stream', function () {
 
     const msgs_p = wait_for_message({ stream })
 
-    const header = '52421212120a0300'
+    const header = '52421414140a0300'
     const body =
-      'c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f8950285ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c111401'
+      'c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f8950285ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c11140100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
 
     const full = header + body
     const chunks = []
@@ -63,7 +63,7 @@ describe('Nano Stream', function () {
     const msg = msgs[0]
 
     expect(msg.message_type).to.equal(constants.MESSAGE_TYPE.NODE_ID_HANDSHAKE)
-    expect(msg.remote_version).to.equal(18)
+    expect(msg.remote_version).to.equal(20)
     expect(msg.extensions).to.equal(3)
     expect(msg.body).to.equalBytes(Buffer.from(body, 'hex'))
   })
@@ -74,18 +74,18 @@ describe('Nano Stream', function () {
     const msgs_p = wait_for_message({ stream })
 
     const body =
-      'c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f8950285ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c111401'
+      'c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f8950285ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c11140100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
 
-    stream.push(Buffer.from('52421212', 'hex'))
+    stream.push(Buffer.from('52421414', 'hex'))
     stream.push(
       Buffer.from(
-        '120a0300c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f895028',
+        '140a0300c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f895028',
         'hex'
       )
     )
     stream.push(
       Buffer.from(
-        '5ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c111401',
+        '5ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c11140100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
         'hex'
       )
     )
@@ -94,7 +94,7 @@ describe('Nano Stream', function () {
     const msg = msgs[0]
 
     expect(msg.message_type).to.equal(constants.MESSAGE_TYPE.NODE_ID_HANDSHAKE)
-    expect(msg.remote_version).to.equal(18)
+    expect(msg.remote_version).to.equal(20)
     expect(msg.extensions).to.equal(3)
     expect(msg.body).to.equalBytes(Buffer.from(body, 'hex'))
   })
@@ -105,24 +105,24 @@ describe('Nano Stream', function () {
     const msgs_p = wait_for_message({ stream })
 
     const body =
-      'c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f8950285ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c111401'
+      'c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f8950285ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c11140100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
 
-    stream.push(Buffer.from('52421212', 'hex'))
+    stream.push(Buffer.from('52421414', 'hex'))
     stream.push(
       Buffer.from(
-        '120a0300c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f895028',
+        '140a0300c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f895028',
         'hex'
       )
     )
     stream.push(
       Buffer.from(
-        '5ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c11140152421212',
+        '5ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c1114010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000052421414',
         'hex'
       )
     )
     stream.push(
       Buffer.from(
-        '120a0300c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f8950285ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c111401',
+        '140a0300c73848b9227ff859b7a6c793685558d9d5b14f487b7302bfc7bd6e187f8950285ae7ed78c5e75f96e08cd5bb22ecdd09cab40332901a41ef7877ba0cf823fc3be8f67856d89165840280e71b10e62facdbddff161ac86fa47cd59dc7c2ced033d0f55584443914b9cf74ce6de9af04cd215c95046a7a450d3403fb263c11140100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
         'hex'
       )
     )
@@ -133,7 +133,7 @@ describe('Nano Stream', function () {
     expect(msg_a.message_type).to.equal(
       constants.MESSAGE_TYPE.NODE_ID_HANDSHAKE
     )
-    expect(msg_a.remote_version).to.equal(18)
+    expect(msg_a.remote_version).to.equal(20)
     expect(msg_a.extensions).to.equal(3)
     expect(msg_a.body).to.equalBytes(Buffer.from(body, 'hex'))
 
@@ -142,7 +142,7 @@ describe('Nano Stream', function () {
     expect(msg_b.message_type).to.equal(
       constants.MESSAGE_TYPE.NODE_ID_HANDSHAKE
     )
-    expect(msg_b.remote_version).to.equal(18)
+    expect(msg_b.remote_version).to.equal(20)
     expect(msg_b.extensions).to.equal(3)
     expect(msg_b.body).to.equalBytes(Buffer.from(body, 'hex'))
   })
