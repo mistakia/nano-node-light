@@ -2680,6 +2680,9 @@ __metadata:
     mocha: "npm:^9.2.2"
     prettier: "npm:^2.6.2"
     yargs: "npm:^17.4.0"
+  dependenciesMeta:
+    "@trashman/ed25519-blake2b":
+      built: true
   languageName: unknown
   linkType: soft
 
