@@ -87,9 +87,8 @@ const confirm_account = async ({ account_address }) => {
   const { public_key: account_public_key } = decode_address({
     address: account_address
   })
-  const { frontier_hash, block_info } = await get_account_frontier(
-    account_public_key
-  )
+  const { frontier_hash, block_info } =
+    await get_account_frontier(account_public_key)
 
   const confirmed_block = await node.confirm_block({
     block_hash: frontier_hash,
@@ -142,9 +141,8 @@ const bootstrap_quorum_weights = async () => {
     const { public_key: account_public_key } = decode_address({
       address: account_address
     })
-    const { frontier_hash, block_info } = await get_account_frontier(
-      account_public_key
-    )
+    const { frontier_hash, block_info } =
+      await get_account_frontier(account_public_key)
     frontiers.push({
       block_hash: frontier_hash,
       previous_block_hash_buffer: block_info.previous_hash,
