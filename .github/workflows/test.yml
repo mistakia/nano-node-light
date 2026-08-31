@@ -25,7 +25,11 @@ jobs:
         run: |
           yarn install --frozen-lockfile
 
-      - name: yarn test
-        run: |
-          yarn lint
-          yarn test
+      # THE HERMETIC SET, and the ONE definition of it. `yarn verify` is
+      # `yarn lint && yarn test` -- this whole job, since nothing here needs a
+      # service. The pre-push gate
+      # (user:cli/lib/pre-push-guard-local-verify.sh) runs THIS SAME script
+      # against the outgoing SHA in a persistent worktree, so CI and the gate
+      # cannot drift. Measured 2026-08-30: 3s.
+      - name: Verify (lint + tests)
+        run: yarn verify
