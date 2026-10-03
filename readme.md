@@ -7,9 +7,9 @@ description: >-
 base_uri: user:repository/active/nano-node-light/README.md
 created_at: '2026-03-06T19:51:53.878Z'
 entity_id: 72a808d5-d002-4330-9022-48910f318d1c
+owner_identity_uri: user:identity/trashman.md
 public_read: true
 updated_at: '2026-03-06T19:51:53.878Z'
-user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
 A lightweight Nano Node implementation designed for wallets and other services, built to be compatible with Nano's official reference implementation.

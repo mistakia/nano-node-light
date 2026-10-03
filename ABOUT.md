@@ -7,6 +7,7 @@ description: >-
 base_uri: user:repository/active/nano-node-light/ABOUT.md
 created_at: '2026-05-13T18:06:58.523Z'
 entity_id: 4bfcf2e2-a79b-4400-9268-648bdd3b129b
+owner_identity_uri: user:identity/trashman.md
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
@@ -14,7 +15,6 @@ tags:
   - user:tag/nano-node-light-project.md
   - user:tag/nano-cryptocurrency.md
 updated_at: '2026-05-13T18:06:58.523Z'
-user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
 ## Purpose
