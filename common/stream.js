@@ -3,19 +3,22 @@
 */
 
 import * as constants from './constants.js'
+import { get_block_type, get_item_count } from './index.js'
 import EventEmitter from 'events'
 
-class StreamError {
+class StreamError extends Error {
   constructor(code) {
+    super(code)
     this.code = code
   }
 }
 
-const ERRORS = {
-  UNSUPPORTED_NETWORK: new StreamError('UNSUPPORTED_NETWORK'),
-  PAYLOAD_EXCEEDS_LIMIT: new StreamError('PAYLOAD_EXCEEDS_LIMIT'),
-  UNSUPPORTED_VERSION: new StreamError('UNSUPPORTED_VERSION'),
-  INVALID_OP_CODE: new StreamError('INVALID_OP_CODE') // Message Type
+const ERROR_CODE = {
+  UNSUPPORTED_NETWORK: 'UNSUPPORTED_NETWORK',
+  PAYLOAD_EXCEEDS_LIMIT: 'PAYLOAD_EXCEEDS_LIMIT',
+  UNSUPPORTED_VERSION: 'UNSUPPORTED_VERSION',
+  INVALID_OP_CODE: 'INVALID_OP_CODE', // Message Type
+  INVALID_BLOCK_TYPE: 'INVALID_BLOCK_TYPE'
 }
 
 const MAX_PACKET_LENGTH = 1024 * 65
@@ -46,65 +49,24 @@ function set_default_state(state) {
   state.expected_body_size = null
 }
 
-function get_size_origin(header) {
+// Body size from the header, sized as nano-node does. Returns null for an
+// unknown message type and throws for a publish of an unknown block type.
+function get_size(header) {
   switch (header.message_type) {
     case constants.MESSAGE_TYPE.KEEPALIVE: {
       return 144
     }
     case constants.MESSAGE_TYPE.PUBLISH: {
-      const block_type = (header.extensions & 0x0f00) >> 8
-      const block_size = constants.BLOCK_SIZES[block_type]
-
-      if (block_size) return block_size
-      return 0
+      const block_size =
+        constants.BLOCK_SIZES[get_block_type(header.extensions)]
+      if (!block_size) throw new StreamError(ERROR_CODE.INVALID_BLOCK_TYPE)
+      return block_size
     }
     case constants.MESSAGE_TYPE.CONFIRM_REQ: {
-      const block_type = (header.extensions & 0x0f00) >> 8
-      const is_v2 = (header.extensions & 0x01) !== 0
-      let block_count
-
-      if (is_v2) {
-        const left = (header.extensions & 0xf000) >> 12
-        const right = (header.extensions & 0x00f0) >> 4
-        block_count = (left << 4) | right
-      } else {
-        block_count = (header.extensions & 0xf000) >> 12
-      }
-
-      if (block_type !== 0 && block_type !== 1) {
-        const block_size = constants.BLOCK_SIZES[block_type]
-        if (block_size) return block_size
-      } else if (block_type === 1) {
-        return block_count * 64
-      }
-
-      return 0
+      return get_item_count(header.extensions) * 64
     }
     case constants.MESSAGE_TYPE.CONFIRM_ACK: {
-      const block_type = (header.extensions & 0x0f00) >> 8
-      const is_v2 = (header.extensions & 0x01) !== 0
-      let block_count
-
-      if (is_v2) {
-        const left = (header.extensions & 0xf000) >> 12
-        const right = (header.extensions & 0x00f0) >> 4
-        block_count = (left << 4) | right
-      } else {
-        block_count = (header.extensions & 0xf000) >> 12
-      }
-
-      let size = 0
-
-      if (block_type !== 0 && block_type !== 1) {
-        const block_size = constants.BLOCK_SIZES[block_type]
-        if (block_size) {
-          size = block_size
-        }
-      } else if (block_type === 1) {
-        size = block_count * 32
-      }
-
-      return 104 + size
+      return 104 + get_item_count(header.extensions) * 32
     }
     case constants.MESSAGE_TYPE.BULK_PULL: {
       const extended_length = header.extensions & 0x1 && 8
@@ -116,7 +78,9 @@ function get_size_origin(header) {
     }
     case constants.MESSAGE_TYPE.NODE_ID_HANDSHAKE: {
       const query_length = header.extensions & 0x1 && 32
-      const response_length = header.extensions & 0x2 && 160
+      // A v2 response carries a salt and genesis hash: 160 bytes, else 96.
+      const response_length =
+        header.extensions & 0x2 ? (header.extensions & 0x4 ? 160 : 96) : 0
 
       return query_length + response_length
     }
@@ -145,21 +109,9 @@ function get_size_origin(header) {
   return null
 }
 
-function get_size_light(header) {
-  return null
-}
-
-function get_size(header, mode) {
-  if (mode === 1) {
-    return get_size_light(header)
-  } else {
-    return get_size_origin(header)
-  }
-}
-
-function process_stream(data) {
-  if (!this.active) return
-
+// Frames data into messages, appending each to `messages`. Throws a
+// StreamError on a framing error.
+function frame(data, messages) {
   let next_data = data
 
   for (;;) {
@@ -174,7 +126,7 @@ function process_stream(data) {
         const message_body = Buffer.alloc(this.state.expected_body_size)
         this.state.body.copy(message_body)
 
-        this.emit('message', {
+        messages.push({
           body: message_body,
           extensions: this.state.extensions,
           message_type: this.state.message_type,
@@ -194,27 +146,29 @@ function process_stream(data) {
 
       if (this.state.header_length === 8) {
         if (this.state.header[0] !== constants.MAGIC_NUMBER)
-          throw ERRORS.UNSUPPORTED_NETWORK
+          throw new StreamError(ERROR_CODE.UNSUPPORTED_NETWORK)
         if (this.state.header[1] !== this.network)
-          throw ERRORS.UNSUPPORTED_NETWORK
+          throw new StreamError(ERROR_CODE.UNSUPPORTED_NETWORK)
         if (this.state.header[3] < constants.MINIMUM_PROTOCOL_VERSION)
-          throw ERRORS.UNSUPPORTED_VERSION
+          throw new StreamError(ERROR_CODE.UNSUPPORTED_VERSION)
         if (this.state.header[4] > constants.MAXIMUM_PROTOCOL_VERSION)
-          throw ERRORS.UNSUPPORTED_VERSION
+          throw new StreamError(ERROR_CODE.UNSUPPORTED_VERSION)
 
         this.state.version = this.state.header[3]
         this.state.message_type = this.state.header[5]
         this.state.extensions =
           (this.state.header[7] << 8) + this.state.header[6]
-        const body_size = get_size(this.state, this.stream_mode)
+        const body_size = get_size(this.state)
 
-        if (body_size == null) throw ERRORS.INVALID_OP_CODE
-        if (body_size > MAX_PACKET_LENGTH) throw ERRORS.PAYLOAD_EXCEEDS_LIMIT
+        if (body_size == null) throw new StreamError(ERROR_CODE.INVALID_OP_CODE)
+        if (body_size > MAX_PACKET_LENGTH)
+          throw new StreamError(ERROR_CODE.PAYLOAD_EXCEEDS_LIMIT)
 
         this.state.expected_body_size = body_size
 
+        // An empty body completes the message without waiting for more data.
         next_data = next_data.subarray(header_ptr)
-        if (next_data.length > 0) continue
+        if (next_data.length > 0 || body_size === 0) continue
       }
     }
 
@@ -222,55 +176,63 @@ function process_stream(data) {
   }
 }
 
+// Emits `message` per framed message. A framing error emits `stream_error`
+// once and ends the stream; an exception thrown by a `message` listener is
+// emitted as `handler_error` and framing continues.
 class NanoStream extends EventEmitter {
-  constructor(network = constants.NETWORK.BETA.ID) {
+  constructor(network) {
     super()
+
+    if (network == null) throw new Error('network is required')
 
     this.network = network
     this.state = get_default()
     this.is_busy = false
     this.queue = []
-
-    this.stream_mode = 0
-
     this.active = true
   }
 
-  process(packet) {
+  push(packet) {
+    if (!this.active) return
+
+    this.queue.push(packet)
+    if (this.is_busy) return
+
     this.is_busy = true
-
-    let next_packet = packet
-
-    while (next_packet) {
+    while (this.active && this.queue.length) {
+      const messages = []
+      let framing_error = null
       try {
-        process_stream.call(this, next_packet)
-
-        next_packet = this.queue.shift()
-      } catch (e) {
-        this.destroy(e)
-
-        return
+        frame.call(this, this.queue.shift(), messages)
+      } catch (error) {
+        framing_error = error
       }
-    }
 
+      for (const message of messages) {
+        if (!this.active) break
+        try {
+          this.emit('message', message)
+        } catch (error) {
+          this.emit('handler_error', error)
+        }
+      }
+
+      if (framing_error) this.destroy(framing_error)
+    }
     this.is_busy = false
   }
 
-  destroy(e) {
-    this.active = false
-    this.queue = []
-    this.is_busy = true
-    delete this.state
+  destroy(error) {
+    if (!this.active) return
 
-    this.emit('stream_error', e) // Emitting error causes a Uncaught Exception
+    this.stop()
+    this.emit('stream_error', error)
   }
 
-  push(packet) {
-    if (this.is_busy) {
-      this.queue.push(packet)
-    } else {
-      this.process(packet)
-    }
+  // Ends framing without an error, for a connection that closed.
+  stop() {
+    this.active = false
+    this.queue = []
   }
 }
 

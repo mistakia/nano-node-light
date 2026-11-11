@@ -19,7 +19,7 @@ updated_at: '2026-05-13T18:06:58.523Z'
 
 ## Purpose
 
-Lightweight nano protocol implementation in pure ES modules — runs in browsers and Node.js. Suitable for wallets and as an alternative to running a full nano node for RPC consumers.
+Lightweight nano protocol implementation in pure ES modules — runs in browsers and Node.js. Suitable for wallets, as an alternative to running a full nano node for RPC consumers, and for continuous network observation: it is the protocol source for the nano.community network observer ([[user:task/nano-cryptocurrency/nano-community/build-nano-community-network-observer.md]]), emitting peer-attributed vote, block, telemetry and invalid-signature events.
 
 For public overview, see [[README.md]]. For agent-facing build, layout, and conventions, see [[CLAUDE.md]].
 
@@ -48,7 +48,7 @@ Part of the nano cryptocurrency ecosystem maintained here. The handshake protoco
 
 ## Scope
 
-**Belongs in this repo**: protocol implementation (handshake, frontier streaming, peer management, socket abstraction), block validation glue, CLI in `bin/`.
+**Belongs in this repo**: protocol implementation (handshake, framing, frontier streaming, peer management, socket abstraction), vote and block decoding and verification, the network observation CLI in `bin/`. Persistence and detection of network events belong to the consumer (nano-community).
 
 **Belongs elsewhere**:
 

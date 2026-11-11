@@ -1,5 +1,3 @@
-export const QUORUM_THRESHOLD = 60000000000000000000000000000000000000n
-
 export const MAGIC_NUMBER = 'R'.charCodeAt(0)
 
 export const SELF_ADDRESS = Buffer.alloc(16, 0)
@@ -32,22 +30,36 @@ export const MESSAGE_TYPE = {
   PROTOCOL_UPGRADE: 0x1f
 }
 export const MESSAGE_TYPE_NAME = {
-  [MESSAGE_TYPE.INVALID]: 'Invalid',
-  [MESSAGE_TYPE.NAT]: 'NaT',
-  [MESSAGE_TYPE.KEEPALIVE]: 'KeepAlive',
-  [MESSAGE_TYPE.PUBLISH]: 'Publish',
-  [MESSAGE_TYPE.CONFIRM_REQ]: 'ConfirmReq',
-  [MESSAGE_TYPE.CONFIRM_ACK]: 'ConfirmAck',
-  [MESSAGE_TYPE.BULK_PULL]: 'BulkPull',
-  [MESSAGE_TYPE.FRONTIER_REQ]: 'FrontierReq',
-  [MESSAGE_TYPE.NODE_ID_HANDSHAKE]: 'NodeIDHandshake',
-  [MESSAGE_TYPE.BULK_PULL_ACCOUNT]: 'BulkPullAccount',
-  [MESSAGE_TYPE.TELEMETRY_REQ]: 'TelemetryReq',
-  [MESSAGE_TYPE.TELEMETRY_ACK]: 'TelemetryAck',
-  [MESSAGE_TYPE.ASC_PULL_REQ]: 'AscPullReq',
-  [MESSAGE_TYPE.ASC_PULL_ACK]: 'AscPullAck',
-  [MESSAGE_TYPE.PROTOCOL_UPGRADE]: 'ProtocolUpgrade'
+  [MESSAGE_TYPE.INVALID]: 'invalid',
+  [MESSAGE_TYPE.NAT]: 'not_a_type',
+  [MESSAGE_TYPE.KEEPALIVE]: 'keepalive',
+  [MESSAGE_TYPE.PUBLISH]: 'publish',
+  [MESSAGE_TYPE.CONFIRM_REQ]: 'confirm_req',
+  [MESSAGE_TYPE.CONFIRM_ACK]: 'confirm_ack',
+  [MESSAGE_TYPE.BULK_PULL]: 'bulk_pull',
+  [MESSAGE_TYPE.FRONTIER_REQ]: 'frontier_req',
+  [MESSAGE_TYPE.NODE_ID_HANDSHAKE]: 'node_id_handshake',
+  [MESSAGE_TYPE.BULK_PULL_ACCOUNT]: 'bulk_pull_account',
+  [MESSAGE_TYPE.TELEMETRY_REQ]: 'telemetry_req',
+  [MESSAGE_TYPE.TELEMETRY_ACK]: 'telemetry_ack',
+  [MESSAGE_TYPE.ASC_PULL_REQ]: 'asc_pull_req',
+  [MESSAGE_TYPE.ASC_PULL_ACK]: 'asc_pull_ack',
+  [MESSAGE_TYPE.PROTOCOL_UPGRADE]: 'protocol_upgrade'
 }
+
+export const BLOCK_TYPE = {
+  INVALID: 0x00,
+  NOT_A_BLOCK: 0x01,
+  SEND: 0x02,
+  RECEIVE: 0x03,
+  OPEN: 0x04,
+  CHANGE: 0x05,
+  STATE: 0x06
+}
+
+// Header extension bit 2 marks a confirm_ack relayed by a node other than
+// the voting representative's own.
+export const REBROADCAST_FLAG = 0x4
 
 export const BLOCK_SIZES = {
   0x00: 0, // Invalid
@@ -62,25 +74,59 @@ export const BLOCK_SIZES = {
 export const NETWORK = {
   LIVE: {
     ID: 'C'.charCodeAt(0),
-    ADDRESS: 'peering.nano.org',
     PORT: 7075,
-    TELEMETRY_CACHE_CUTOFF: 6e10, // 60 seconds,
     GENESIS_BLOCK:
-      '991CF190094C00F0B68E2E5F75F6BEE95A2E0BD93CEAA4A6734DB9F19B728948'
+      '991CF190094C00F0B68E2E5F75F6BEE95A2E0BD93CEAA4A6734DB9F19B728948',
+    // Epoch blocks are signed by the epoch signer, not the account. Keyed by
+    // the epoch link ("epoch v1 block", "epoch v2 block" zero-padded).
+    EPOCH_SIGNER_BY_LINK: {
+      '65706f636820763120626c6f636b000000000000000000000000000000000000':
+        'e89208dd038fbb269987689621d52292ae9c35941a7484756ecced92a65093ba',
+      '65706f636820763220626c6f636b000000000000000000000000000000000000':
+        'dd24a9200d4bf8247981e4ac63dbde38fd2319386970a26d02ecc98c79975db1'
+    }
   },
   BETA: {
     ID: 'B'.charCodeAt(0),
-    ADDRESS: 'peering-beta.nano.org',
     PORT: 54000,
-    TELEMETRY_CACHE_CUTOFF: 15e9, // 15 seconds,
     GENESIS_BLOCK:
       'E1227CF974C1455A8B630433D94F3DDBF495EEAC9ADD2481A4A1D90A0D00F488'
   },
   TEST: {
     ID: 'X'.charCodeAt(0),
-    ADDRESS: 'peering-test.nano.org',
     PORT: 17075,
-    TELEMETRY_CACHE_CUTOFF: 6e10, // 60 seconds,
     GENESIS_BLOCK: '' // TODO
   }
 }
+
+export const DISCONNECT_REASON = {
+  SOCKET_CLOSED: 'socket_closed',
+  SOCKET_ERROR: 'socket_error',
+  HANDSHAKE_TIMEOUT: 'handshake_timeout',
+  IDLE_TIMEOUT: 'idle_timeout',
+  PROTOCOL_ERROR: 'protocol_error',
+  HANDSHAKE_INVALID: 'handshake_invalid',
+  DUPLICATE_NODE_ID: 'duplicate_node_id',
+  TELEMETRY_NODE_ID_MISMATCH: 'telemetry_node_id_mismatch'
+}
+
+export const DROP_REASON = {
+  BEFORE_HANDSHAKE: 'before_handshake',
+  MALFORMED: 'malformed',
+  HANDLER_ERROR: 'handler_error',
+  PUBLISH_LEGACY_IGNORED: 'publish_legacy_ignored'
+}
+
+export const DEFAULT_CONFIG = {
+  maximum_peer_count: 200,
+  handshake_timeout_ms: 10000,
+  idle_timeout_ms: 120000,
+  reconnect_delay_ms: 60000,
+  vote_cache_maximum_entry_count: 65536
+}
+
+export const BLOCK_CACHE_MAXIMUM_ENTRY_COUNT = 16384
+export const ADDRESS_TABLE_MAXIMUM_ENTRY_COUNT = 2048
+export const PEER_REFILL_INTERVAL_MS = 15 * 1000
+export const MAXIMUM_RECONNECT_DELAY_MS = 30 * 60 * 1000
+export const BACKOFF_RESET_CONNECTED_MS = 5 * 60 * 1000

@@ -20,6 +20,32 @@ A lightweight Nano Node implementation designed for wallets and other services, 
 - Offer an alternative to public RPC servers for accessing the state of the Nano ledger.
 - Ensure compatibility with the official RPC protocol and reference implementation of Nano.
 
+## Usage
+
+```js
+import NanoNode, { NanoConstants } from 'nano-node-light'
+
+const node = new NanoNode({
+  network: NanoConstants.NETWORK.LIVE,
+  // host:port or [address]:port; there is no default bootstrap host
+  bootstrap_peers: ['203.0.113.10:7075', '[2001:db8::10]:7075']
+})
+
+node.on('vote', (vote) => {
+  console.log(vote.representative_account, vote.block_hashes, vote.is_final)
+})
+
+node.on('peer_disconnected', ({ peer_address, disconnect_reason }) => {
+  console.log(peer_address, disconnect_reason)
+})
+```
+
+To watch a network from the command line:
+
+```sh
+node bin/observe-network.js --network live --bootstrap-peers 203.0.113.10:7075
+```
+
 ## Status
 
 The node implementation is currently under heavy development and has not yet reached a stable release. It has not been audited and should not be used in production environments.
