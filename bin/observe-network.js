@@ -173,17 +173,26 @@ function start_confirm_request_probe() {
             hash_root_pairs,
             timeout_ms: PROBE_TIMEOUT_MS
           })
-          .catch(() => [])
+          .then((reply) => ({ peer_node_id, ...reply }))
+          .catch(() => ({ peer_node_id, votes: [] }))
       )
     )
+    const round_trips = replies
+      .filter(({ votes }) => votes.length)
+      .map(({ peer_node_id, requested_at_ms, votes }) => ({
+        peer_node_id,
+        peer_address: votes[0].peer_address,
+        round_trip_ms:
+          Math.min(...votes.map((vote) => vote.received_at_ms)) -
+          requested_at_ms
+      }))
 
     print({
       type: 'confirm_request_probe',
       at_ms: Date.now(),
       hash_root_pairs,
-      request_votes_from_peer_replying_peer_count: replies.filter(
-        (votes) => votes.length
-      ).length,
+      request_votes_from_peer_replying_peer_count: round_trips.length,
+      round_trips,
       asked: summarize('asked'),
       control: summarize('control'),
       votes: probe.votes.filter((vote) => vote.group === 'asked')

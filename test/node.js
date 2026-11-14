@@ -165,7 +165,7 @@ describe('Nano Node', function () {
       )
     })
 
-    const votes = await node.request_votes_from_peer({
+    const { requested_at_ms, votes } = await node.request_votes_from_peer({
       peer_node_id: target_peer.peer_node_id,
       hash_root_pairs: [
         { block_hash: block_hash.toString('hex'), root: root.toString('hex') }
@@ -177,6 +177,8 @@ describe('Nano Node', function () {
     expect(votes[0].peer_node_id).to.equal(target_peer.peer_node_id)
     expect(votes[0].is_rebroadcast).to.equal(false)
     expect(votes[0].block_hashes).to.deep.equal([block_hash.toString('hex')])
+    expect(requested_at_ms).to.be.a('number')
+    expect(votes[0].received_at_ms - requested_at_ms).to.be.within(0, 300)
   })
 
   it('request_votes_from_peer rejects for an unknown peer', async () => {
